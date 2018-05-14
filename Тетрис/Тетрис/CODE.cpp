@@ -52,13 +52,7 @@ int main()
 	
 	Sprite B(bloks), M(map);
 
-	Font font;//шрифт
-	font.loadFromFile("20db.ttf");
-
-	Text text("", font, 15);
-	text.setColor(Color::Black);
 	
-	int p(0);//переменная счета score
 
 	int dx = 0; 
 	bool rotate = 0; 
@@ -181,12 +175,7 @@ int main()
 			B.move(28, 31); //то, откуда будут начинаться фигуры
 			window.draw(B);		
 		}
-		//Вывод текста на экран
-		ostringstream Score;
-		Score << p;
-		text.setString("Score: "+ Score.str());
-		text.setPosition(27, 0);
-		window.draw(text);
+		
 		window.display();
 	}
 	return 0;
