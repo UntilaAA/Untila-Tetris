@@ -13,22 +13,22 @@ int field[H][W] = { 0 };//поле
 struct Point//структура определяющая точку на двумерной плоскости
 {int x, y;}
 //переменные которые хранят в себе одну фигуру(в каждой фигуре 4 блока)
-a[4],// выпадающий блок
-b[4],//состояние которое не изменяется 
-c[4];// необходима для того, чтобы реализовать алгоритм показывающий Next
+a[4],// фигурка которая будет появлятся 
+b[4],//фигурка необходямая для хранения a, если та не проходит проверку на выход за пределы поля
+c[4];// следующая фигурка
 
-int figures[7][4] =//массив хранящий фигуры, их расположение в прямоугольнике(рис.1)
+int figures[7][4] =//массив хранящий фигуры, их расположение в прямоугольнике
 {
 	1,3,5,7, // I
-	2,4,5,7, // Z
-	3,5,4,6, // S
-	3,5,4,7, // T
-	2,3,5,7, // L
-	3,5,7,6, // J
+	0,2,3,5, // Z
+	1,3,2,4, // Z
+	1,3,5,2, // S
+	0,1,3,5, // L
+	1,3,5,4, // J
 	0,1,2,3, // O
 };
 
-bool check()//проверка на выход из пределов поля
+bool check()//проверка на выход за пределов поля
 {
 	for (int i = 0; i < 4; i++)
 		if (a[i].x < 0 || a[i].x >= W || a[i].y >= H) return 0;
@@ -37,7 +37,7 @@ bool check()//проверка на выход из пределов поля
 		return 1;
 }
 
-int game()
+int main()
 {
 	srand(time(0));//инициализация генератора случайных чисел
 
@@ -58,9 +58,9 @@ int game()
 	text1.setColor(Color::Black);
 	text.setColor(Color::Black);
 
-	int p(0);//переменная счета score
+	int p(0);//переменная счета 
 
-	int n = rand() % 7;
+	int n = rand() % 7;//случайная фигурка
 	int R = rand() % 7;//необходим только для отрисовки первой фигурки
 
 	for (int i = 0; i < 4; i++)//создает самую первую фигуру в a, инициализация переменной
@@ -69,16 +69,18 @@ int game()
 		a[i].y = figures[R][i] / 2;
 	}
 
-	int dx = 0; bool rotate = 0; int colorNum = 1 + rand() % 7;
+	int dx = 0;// переменная для движения фигурки вправо и влево
+	bool rotate = 0;//переменная для вращения фигурки
+	int colorNum = 1 + rand() % 7;//цвет фигурки
 
-	float timer(0), // Таймер, считает время прошедшее с запуска программы
-		delay(0.4); // Через сколько секунд будет падать блок (частота падения)
+	float timer(0); // таймер, считает время прошедшее с запуска программы
+	float delay(0.4); // через сколько секунд будет падать блок (частота падения)
 
 	Clock C;
 
 	while (window.isOpen())
 	{
-		float time = C.getElapsedTime().asSeconds(); // Возвращает время, прошедшее с запуска часов (в секундах)
+		float time = C.getElapsedTime().asSeconds(); // возвращает время, прошедшее с запуска часов (в секундах)
 		C.restart(); // Перезапускает часы
 		timer += time;
 
@@ -89,13 +91,13 @@ int game()
 				window.close();
 
 			if (event.type == Event::KeyPressed)//нажатие клавиш
-				if (event.key.code == Keyboard::Up) rotate = true;
-				else if (event.key.code == Keyboard::Left) dx = -1;
-				else if (event.key.code == Keyboard::Right) dx = 1;
+				if ((event.key.code == Keyboard::Up) || (event.key.code == Keyboard::W)) rotate = true;//начнет блок вращения 
+				else if ((event.key.code == Keyboard::Left) || (event.key.code == Keyboard::A)) dx = -1;//если повернули влево, то по иксу смещаемся на -1
+				else if ((event.key.code == Keyboard::Right)|| (event.key.code == Keyboard::D)) dx = 1;//если повернули вправо, то по иксу смещаемся на +1
 		}
 
 		if (Keyboard::isKeyPressed(Keyboard::Escape)) window.close();//закрытие окна по нажанию на Escape
-		if (Keyboard::isKeyPressed(Keyboard::Down)) delay = 0.05;//ускоряет падение
+		if (Keyboard::isKeyPressed(Keyboard::Down)|| Keyboard::isKeyPressed(Keyboard::S)) delay = 0.05;//ускоряет падение
 
 		// Движение ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		for (int i = 0; i < 4; i++)
@@ -168,31 +170,30 @@ int game()
 			if (count < W) { LL--; }
 		}
 
-
 		dx = 0; rotate = 0; delay = 0.4; p++;
 
 		//Рисование////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		window.clear(Color::White);
 		window.draw(M);
 
-		if (check() == 0)//проверка на конец игры
+		if (check() == 0)
 		{
 			window.draw(GO);
 			text.setPosition(75, 235);
 			window.draw(text);
 			window.display();
-			if (Keyboard::isKeyPressed(Keyboard::Space))//новая игра если нажат пробел
+			if (Keyboard::isKeyPressed(Keyboard::Space))
 			{
-				p = 0;//переменная счета score
+				p = 0;
 				 n = 0;
-				for (int i = 0; i < 4; i++)//создает самую первую фигуру в a
+				for (int i = 0; i < 4; i++)
 				{
 					a[i].x = 0;
 					a[i].y = 0;
 					b[i].x = 0;
 					b[i].y = 0;
 					c[i].x = 0;
-					c[i].y = 0;
+				    c[i].y = 0;
 				}
 				for (int i = 0; i < H; i++)
 				{
@@ -201,10 +202,10 @@ int game()
 				}
 				int dx = 0; bool rotate = 0; int colorNum = 0;
 
-				float timer(0), // Таймер, считает время прошедшее с запуска программы
-					delay(0); // Через сколько секунд будет падать блок (частота падения)
+				float timer(0), 
+					delay(0.4); 
 				int R = rand() % 7;
-				for (int i = 0; i < 4; i++)//создает самую первую фигуру в a
+				for (int i = 0; i < 4; i++)
 				{
 					a[i].x = figures[R][i] % 2;
 					a[i].y = figures[R][i] / 2;
@@ -214,15 +215,15 @@ int game()
 					check() == !check();
 				}
 			}
-			if (Keyboard::isKeyPressed(Keyboard::Escape)) window.close();//Закрыть игру
+			if (Keyboard::isKeyPressed(Keyboard::Escape)) window.close();
 		}
-		else//если не конец игры, то рисуем дальше
+		else
 		{
 			for (int i = 0; i < 4; i++)//показывает следующую фигурку
 			{
-				BB.setTextureRect(IntRect(145, 0, 18, 18));//выбирает серый кубик
+				BB.setTextureRect(IntRect(145, 0, 18, 18));
 				BB.setPosition(c[i].x * 18, c[i].y * 18);
-				BB.move(234, 50);//где будет рисоваться
+				BB.move(234, 50);
 				window.draw(BB);
 			}
 
@@ -241,13 +242,13 @@ int game()
 			for (int i = 0; i < 4; i++)//рисует фигуру, каждый раз расставляя спрайт S
 			{
 				B.setTextureRect(IntRect(colorNum * 18, 0, 18, 18));
-				B.setPosition(a[i].x * 18, a[i].y * 18);//умножаем на 18, т.к. каждый блок размера 18 на 18
-				B.move(28, 31);//то, откуда будут начинаться фигуры
+				B.setPosition(a[i].x * 18, a[i].y * 18);
+				B.move(28, 31);
 				window.draw(B);
 			}
 
 			//Вывод текста на экран
-			ostringstream Score;
+			ostringstream Score;//класс для преобразования целых чисел в обычную строчку 
 			Score << (p / 100);
 			text.setString("Score: " + Score.str());
 			text1.setString("Next:");
@@ -260,6 +261,3 @@ int game()
 	}
 	return 0;
 }
-
-int main()
-{game();}
